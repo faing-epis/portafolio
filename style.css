@@ -1,0 +1,378 @@
+:root {
+    --font-family: "Segoe UI", "Inter", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+    
+    /* Paleta Inspirada en "Windows 12" (Conceptual) */
+    --primary-color: #005fba;
+    --primary-color-light: rgba(0, 120, 212, 0.15);
+    --primary-color-focus-ring: rgba(0, 120, 212, 0.3);
+    
+    --success-color: #0d875a;
+    --warning-color: #b48700;
+    --danger-color: #d13438;
+    --orange-color: #f7630c;
+
+    --success-bg: #e7f4f0;
+    --warning-bg: #fff9e6;
+    --danger-bg: #fdf0f0;
+    --orange-bg: #fff4ec;
+
+    --text-primary: #0d0d0d;
+    --text-secondary: #595959;
+    --text-on-primary: #ffffff;
+    
+    --surface-ground: #f9f9f9;
+    --surface-card: rgba(255, 255, 255, 0.85); /* Efecto Acrílico */
+    --surface-border: rgba(0, 0, 0, 0.08);
+    --surface-border-light: rgba(0, 0, 0, 0.05);
+    
+    --border-radius: 8px;
+    --transition-speed: 0.25s;
+    --box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    --box-shadow-hover: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--surface-ground);
+    background-image: linear-gradient(to top, #f8f9fa, #ffffff);
+    color: var(--text-primary);
+    margin: 0;
+    padding: 32px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* --- Utilidades y Animaciones --- */
+.spinner {
+    width: 32px; height: 32px; border: 3px solid var(--primary-color-light);
+    border-top: 3px solid var(--primary-color); border-radius: 50%;
+    animation: spin 0.8s cubic-bezier(0.65, 0.05, 0.36, 1) infinite;
+}
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+hr { border: 0; height: 1px; background-color: var(--surface-border-light); margin: 32px 0; }
+
+/* --- Estructura Principal y Contenedor --- */
+#app-container { display: none; }
+.container {
+    max-width: 1200px; margin: 32px auto;
+    background: var(--surface-card);
+    padding: 32px 40px; border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    border: 1px solid rgba(255,255,255,0.9);
+}
+h1 {
+    text-align: center; color: var(--primary-color);
+    font-size: 2em; font-weight: 600; margin-bottom: 8px;
+}
+#semester-display {
+    text-align: center; font-size: 1.1em; font-weight: 400;
+    color: var(--text-secondary); margin-bottom: 32px;
+    background: var(--surface-ground); padding: 12px;
+    border-radius: var(--border-radius);
+}
+
+/* --- Modales (Estilo Acrílico) --- */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 9999; display: none; justify-content: center; align-items: center;
+    background-color: rgba(240, 240, 240, 0.5);
+    backdrop-filter: blur(20px) saturate(1.5);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+}
+.modal-content {
+    background: var(--surface-card); padding: 32px; border-radius: var(--border-radius);
+    width: 95%; box-shadow: var(--box-shadow-hover);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    position: relative;
+}
+.modal-close {
+    position: absolute; top: 16px; right: 20px; font-size: 18px;
+    font-weight: normal; cursor: pointer; color: var(--text-secondary);
+    transition: color var(--transition-speed);
+}
+.modal-close:hover { color: var(--text-primary); }
+
+#semesterModal, #passwordModal { display: flex; }
+#semesterModal .modal-content, #passwordModal .modal-content { max-width: 380px; text-align: center; }
+#semesterModal h2, #passwordModal h2 { color: var(--primary-color); margin-top: 0; margin-bottom: 24px; font-weight: 600; }
+#semesterLoader, #passwordLoader { display: none; margin-top: 15px; }
+#passwordModal { display: none; } /* Oculto por defecto */
+#passwordValidationMessage { color: var(--danger-color); height: 20px; font-weight: 500; margin-top: 10px;}
+
+/* --- Formularios y Entradas (Estilo Fluent) --- */
+.form-section { margin-bottom: 24px; }
+.form-section label {
+    font-weight: 600; display: block; margin-bottom: 8px; font-size: 0.9em;
+    color: var(--text-secondary);
+}
+select, input[type="text"], input[type="number"], input[type="password"], textarea {
+    width: 100%; box-sizing: border-box; padding: 10px 12px;
+    border: 1px solid var(--surface-border); border-radius: var(--border-radius);
+    font-size: 1em; font-family: var(--font-family);
+    background-color: #ffffff;
+    transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+}
+select:focus, input:focus, textarea:focus {
+    outline: none; border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-color-focus-ring);
+}
+input::placeholder { color: #a1a1a1; }
+.input-error { border-color: var(--danger-color) !important; }
+
+/* --- Búsqueda --- */
+#search-section { display: none; }
+.search-form { display: flex; gap: 8px; }
+.search-input-wrapper { position: relative; flex-grow: 1; }
+#search-loader { display: none; align-items: center; justify-content: center; flex-direction: column; gap: 15px; padding: 40px 20px; text-align:center; }
+#search-loader h2 { font-weight: 400; color: var(--text-secondary); }
+.suggestions-container {
+    display: none; position: absolute; background-color: #fff;
+    border: 1px solid var(--surface-border); top: calc(100% + 4px);
+    left: 0; right: 0; z-index: 1000;
+    max-height: 240px; overflow-y: auto;
+    box-shadow: var(--box-shadow); border-radius: var(--border-radius);
+}
+.suggestion-item { padding: 10px 15px; cursor: pointer; font-size: 1em; }
+.suggestion-item:hover { background-color: var(--primary-color-light); }
+
+/* --- Resultados y Tarjetas --- */
+#results-container { margin-top: 32px; }
+#teacher-details {
+    background: var(--surface-ground); padding: 20px 24px; border-radius: var(--border-radius); margin-bottom: 32px;
+}
+#teacher-details h2 { color: var(--primary-color); margin: 0; font-size: 1.25em; font-weight: 600; }
+#teacher-details p { margin: 4px 0 0; color: var(--text-secondary); }
+#courses-results {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 24px;
+}
+.course-card {
+    border: none; border-radius: var(--border-radius); padding: 24px;
+    background-color: var(--surface-card); display: flex; flex-direction: column;
+    box-shadow: var(--box-shadow);
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+}
+.course-card:hover { transform: translateY(-4px); box-shadow: var(--box-shadow-hover); }
+.course-card h3 { margin: 0 0 12px 0; font-size: 1.1em; font-weight: 600; color: var(--text-primary); }
+.course-card .details-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px;
+    padding-top: 16px; border-top: 1px solid var(--surface-border-light); font-size: 0.9em;
+}
+.course-card .detail-item strong { font-weight: 600; color: var(--text-secondary); margin-right: 6px; }
+
+/* --- Botones (Estilo Fluent) --- */
+.btn {
+    border: 1px solid var(--surface-border); padding: 8px 16px; border-radius: var(--border-radius);
+    cursor: pointer; font-weight: 600; font-family: var(--font-family);
+    transition: all var(--transition-speed); text-decoration: none;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: 0.9em; background-color: #ffffff; color: var(--text-primary);
+}
+.btn:hover:not(:disabled) { border-color: #bdbdbd; background-color: #f9f9f9; }
+.btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--primary-color-focus-ring); border-color: var(--primary-color); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn.primary, #loadSemesterBtn, #searchButton, .btn-save, #validatePasswordBtn {
+    background-color: var(--primary-color); color: var(--text-on-primary); border-color: var(--primary-color);
+}
+.btn.primary:hover:not(:disabled), #validatePasswordBtn:hover:not(:disabled) { background-color: #0052a2; border-color: #0052a2; }
+
+#loadSemesterBtn, #searchButton, .btn-save, #validatePasswordBtn { font-size: 1em; padding: 10px 16px; }
+
+.course-card .card-buttons {
+    display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center;
+    gap: 8px; margin-top: 20px; border-top: 1px solid var(--surface-border-light); padding-top: 20px;
+}
+
+/* --- BOTONES DE ESTADO --- */
+.btn-state-new {
+    background-color: var(--danger-bg);
+    color: var(--danger-color);
+    border-color: var(--danger-bg);
+}
+.btn-state-new:hover:not(:disabled) {
+    background-color: #fbe7e7;
+    border-color: #fbe7e7;
+}
+.btn-state-pending { 
+    background-color: var(--warning-bg); 
+    color: var(--warning-color); 
+    border-color: var(--warning-bg); 
+}
+.btn-state-pending:hover:not(:disabled) { 
+    background-color: #fff6cf; 
+    border-color: #fff6cf;
+}
+.btn-state-completed { 
+    background-color: var(--success-bg); 
+    color: var(--success-color); 
+    border-color: var(--success-bg); 
+}
+.btn-state-completed:hover:not(:disabled) { 
+    background-color: #e2f2ec; 
+    border-color: #e2f2ec;
+}
+
+/* --- Controles de Modales --- */
+.modal-header { position: relative; }
+.modal-header h2 { font-weight: 600; font-size: 1.5em; margin-bottom: 24px; color: var(--primary-color); }
+.modal-header h2 small { font-size: 0.7em; color: var(--text-secondary); font-weight: 400; display: block; margin-top: 4px; }
+.status-indicator {
+    position: absolute; top: 0; right: 0;
+    padding: 4px 10px; border-radius: 12px; font-weight: 600;
+    font-size: 0.8em; transition: all var(--transition-speed);
+}
+.modal-footer {
+    display: flex; justify-content: flex-end; align-items: center; margin-top: 24px;
+    border-top: 1px solid var(--surface-border-light); padding-top: 24px;
+}
+#final-response, #final-response-portfolio, #final-response-doc-portfolio { flex-grow: 1; text-align: left; font-weight: 500; }
+#final-response a, #final-response-portfolio a, #final-response-doc-portfolio a { color: var(--primary-color); text-decoration: none; font-weight: 600; }
+
+/* --- ESTILO DE PORCENTAJE UNIFICADO --- */
+.percent, .percentage {
+    padding: 5px 8px; border-radius: var(--border-radius);
+    font-weight: 600; font-size: 0.9em; text-align: center;
+    background-color: var(--surface-ground); color: var(--text-secondary);
+}
+.pct-bg-green { background-color: var(--success-bg); color: var(--success-color); }
+.pct-bg-yellow { background-color: var(--warning-bg); color: var(--warning-color); }
+.pct-bg-red { background-color: var(--danger-bg); color: var(--danger-color); }
+
+/* --- Modal de Prueba de Entrada --- */
+#reportModal .modal-content { max-width: 1024px; max-height: 90vh; overflow-y: auto; }
+.skills-header, .skill-row {
+    display: grid; grid-template-columns: 2.5fr 1fr 0.8fr 1fr 0.8fr 1fr 0.8fr 1fr 40px;
+    gap: 12px; align-items: center;
+}
+.skills-header {
+    font-weight: 600; padding-bottom: 8px; border-bottom: 1px solid var(--surface-border);
+    font-size: 0.8em; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;
+}
+.skill-row { margin-top: 12px; }
+.btn-remove-skill { background-color: transparent; color: var(--text-secondary); padding: 4px; border-radius: 50%; width: 28px; height: 28px; font-size: 16px; border: none; }
+.btn-remove-skill:hover { background-color: var(--danger-bg); color: var(--danger-color); }
+#validation-message { color: var(--danger-color); font-weight: 500; margin-top: 12px; text-align: center; height: 20px; font-size: 0.9em; }
+.corrective-measures h4, .signature-section h4 { color: var(--text-primary); font-weight: 600; margin-bottom: 16px; font-size: 1.1em; }
+.checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.checkbox-group { display: flex; align-items: center; gap: 10px; }
+.checkbox-group label { font-size: 0.95em; }
+
+/* --- Firma --- */
+.signature-pad-wrapper { border: 2px dashed var(--surface-border); border-radius: var(--border-radius); position: relative; height: 180px; background: #fff; }
+canvas { width: 100%; height: 100%; cursor: crosshair; touch-action: none; }
+.existing-signature-wrapper iframe { width: 100%; height: 180px; border: 1px solid var(--surface-border); border-radius: var(--border-radius); }
+
+/* --- Modal Portafolio --- */
+#portfolioModal .modal-content { max-width: 1024px; max-height: 90vh; overflow-y: auto; }
+.portfolio-grid { display: grid; grid-template-columns: 1.5fr 1fr 1.5fr; gap: 12px; align-items: center; }
+.portfolio-grid .grid-header { font-weight: 600; color: var(--text-secondary); padding: 8px 0; border-bottom: 1px solid var(--surface-border); font-size: 0.8em; text-transform: uppercase; }
+.portfolio-grid label { font-weight: 600; }
+input:read-only { background-color: var(--surface-border-light); font-weight: 600; border-color: transparent; }
+.portfolio-grid .percentage { position: relative; overflow: hidden; height: 38px; display: flex; justify-content: center; align-items: center; }
+.portfolio-grid .sub-group { padding-left: 20px; border-left: 2px solid var(--surface-border-light); }
+#portfolioValidationMsg { color: var(--danger-color); font-weight: 500; margin-top: 16px; text-align: center; height: 20px; font-size: 0.9em; }
+
+.material-grid {
+    display: grid;
+    grid-template-columns: 2fr 0.5fr 0.5fr 1fr;
+    gap: 12px;
+    align-items: center;
+    margin-top: 20px;
+}
+.material-grid .grid-header { font-weight: 600; text-align: center; color: var(--text-secondary); font-size: 0.8em; text-transform: uppercase; }
+.material-grid label { font-size: 0.95em; }
+.material-grid input[type="checkbox"] { justify-self: center; width: 18px; height: 18px; }
+
+/* --- Modal Documentación --- */
+#docPortfolioModal .modal-content { max-width: 800px; max-height: 90vh; overflow-y: auto; }
+.doc-category { font-weight: 600; color: var(--primary-color); margin-top: 24px; padding-bottom: 8px; font-size: 1.1em; }
+.doc-subcategory { font-weight: 600; color: var(--text-primary); margin-top: 16px; margin-left: 15px; font-size: 1em; }
+
+.doc-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--surface-border-light);
+}
+.doc-item:last-child {
+    border-bottom: none;
+}
+.doc-item label {
+    font-size: 0.95em;
+    color: var(--text-secondary);
+}
+.doc-item-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.folder-status {
+    font-weight: 500;
+    font-size: 0.9em;
+    min-width: 110px;
+    text-align: right;
+}
+.mandatory-star { color: var(--orange-color); font-weight: 600; }
+.mandatory-legend { font-size: 0.8em; color: var(--text-secondary); }
+
+/* --- [NUEVO] Estilo para la ventana flotante (Tooltip) --- */
+.tooltip {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 250px;
+  max-width: 300px;
+  background-color: #333;
+  color: #fff;
+  text-align: left;
+  border-radius: 6px;
+  padding: 8px 12px;
+  position: absolute;
+  z-index: 1000;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -125px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 0.85em;
+  line-height: 1.5;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  word-wrap: break-word;
+}
+.tooltip .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #333 transparent transparent transparent;
+}
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+    body { padding: 12px; }
+    .container, .modal-content { padding: 16px; }
+    .skills-header, .skill-row { font-size: 0.7em; gap: 5px; grid-template-columns: 2fr repeat(7, 1fr) 30px; }
+    .checkbox-grid { grid-template-columns: 1fr; }
+    .material-grid { grid-template-columns: 1fr; text-align: left; gap: 16px; }
+    .material-grid .grid-header { display: none; }
+    .doc-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .doc-item-controls {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
