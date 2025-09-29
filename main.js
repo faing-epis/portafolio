@@ -1,4 +1,4 @@
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzN8ABPrGHeTVciCl5z0SeRIbS0IM_vkLAee-oXj8_aM0bktPGw60AK5xTsg2-v7wWm/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwqkICDF4JnmlVKN_us6sq9QaM8gZ8oK-YQzf6rj1Rlmu-x3DWSs8HJq9Q299agGKjW/exec";
 
 // --- Selectores de Elementos DOM ---
 const semesterModal = document.getElementById('semesterModal');
@@ -90,7 +90,7 @@ let portfolioSignaturePad;
 let docPortfolioSignaturePad;
 let refreshOnClose = false;
 
-// --- Estructura de Portafolio y Campos Obligatorios ---
+// --- Estructura de Portafolio con los 45 campos y campos obligatorios corregidos ---
 const docPortfolioStructure = [
     { type: 'category', label: '1. Información General' },
     { type: 'item', key: 'url_cv_personal', label: 'Curriculum Personal', mandatory: true },
@@ -107,12 +107,15 @@ const docPortfolioStructure = [
     { type: 'item', key: 'url_asistencia_u1', label: 'Asistencia (U1)', mandatory: true },
     { type: 'subcategory', label: '4.2. Recursos Docente' },
     { type: 'item', key: 'url_solucion_examen_u1', label: 'Solución Examen (U1)', mandatory: true },
+    { type: 'item', key: 'url_practica_calificada_docente_u1', label: 'Practica calificada (U1)', mandatory: false },
+    { type: 'item', key: 'url_trabajos_encargados_docente_u1', label: 'Trabajos encargados (U1)', mandatory: true },
     { type: 'item', key: 'url_presentaciones_u1', label: 'Presentaciones (Diapositivas) (U1)', mandatory: true },
     { type: 'item', key: 'url_guias_lab_u1', label: 'Guías de Laboratorios (U1)', mandatory: false },
     { type: 'item', key: 'url_otros_recursos_docente_u1', label: 'Otros Recursos (U1)', mandatory: false },
     { type: 'subcategory', label: '4.3. Recursos Estudiante' },
     { type: 'item', key: 'url_examenes_estudiante_u1', label: 'Examenes (U1)', mandatory: true },
     { type: 'item', key: 'url_practicas_calificadas_u1', label: 'Practicas Calificadas (U1)', mandatory: false },
+    { type: 'item', key: 'url_trabajos_encargados_estudiante_u1', label: 'Trabajos encargados (U1)', mandatory: true },
     { type: 'item', key: 'url_proyecto_final_u1', label: 'Proyecto Final (U1)', mandatory: true },
     { type: 'item', key: 'url_otros_recursos_estudiante_u1', label: 'Otros Recursos (U1)', mandatory: false },
     { type: 'category', label: '5. Unidad II' },
@@ -121,12 +124,15 @@ const docPortfolioStructure = [
     { type: 'item', key: 'url_asistencia_u2', label: 'Asistencia (U2)', mandatory: true },
     { type: 'subcategory', label: '5.2. Recursos Docente' },
     { type: 'item', key: 'url_solucion_examen_u2', label: 'Solución Examen (U2)', mandatory: true },
+    { type: 'item', key: 'url_practica_calificada_docente_u2', label: 'Practica calificada (U2)', mandatory: false },
+    { type: 'item', key: 'url_trabajos_encargados_docente_u2', label: 'Trabajos encargados (U2)', mandatory: true },
     { type: 'item', key: 'url_presentaciones_u2', label: 'Presentaciones (Diapositivas) (U2)', mandatory: true },
     { type: 'item', key: 'url_guias_lab_u2', label: 'Guías de Laboratorios (U2)', mandatory: false },
     { type: 'item', key: 'url_otros_recursos_docente_u2', label: 'Otros Recursos (U2)', mandatory: false },
     { type: 'subcategory', label: '5.3. Recursos Estudiante' },
     { type: 'item', key: 'url_examenes_estudiante_u2', label: 'Examenes (U2)', mandatory: true },
     { type: 'item', key: 'url_practicas_calificadas_u2', label: 'Practicas Calificadas (U2)', mandatory: false },
+    { type: 'item', key: 'url_trabajos_encargados_estudiante_u2', label: 'Trabajos encargados (U2)', mandatory: true },
     { type: 'item', key: 'url_proyecto_final_u2', label: 'Proyecto Final (U2)', mandatory: true },
     { type: 'item', key: 'url_otros_recursos_estudiante_u2', label: 'Otros Recursos (U2)', mandatory: false },
     { type: 'category', label: '6. Unidad III' },
@@ -135,12 +141,15 @@ const docPortfolioStructure = [
     { type: 'item', key: 'url_asistencia_u3', label: 'Asistencia (U3)', mandatory: true },
     { type: 'subcategory', label: '6.2. Recursos Docente' },
     { type: 'item', key: 'url_solucion_examen_u3', label: 'Solución Examen (U3)', mandatory: true },
+    { type: 'item', key: 'url_practica_calificada_docente_u3', label: 'Practica calificada (U3)', mandatory: false },
+    { type: 'item', key: 'url_trabajos_encargados_docente_u3', label: 'Trabajos encargados (U3)', mandatory: true },
     { type: 'item', key: 'url_presentaciones_u3', label: 'Presentaciones (Diapositivas) (U3)', mandatory: true },
     { type: 'item', key: 'url_guias_lab_u3', label: 'Guías de Laboratorios (U3)', mandatory: false },
     { type: 'item', key: 'url_otros_recursos_docente_u3', label: 'Otros Recursos (U3)', mandatory: false },
     { type: 'subcategory', label: '6.3. Recursos Estudiante' },
     { type: 'item', key: 'url_examenes_estudiante_u3', label: 'Examenes (U3)', mandatory: true },
     { type: 'item', key: 'url_practicas_calificadas_u3', label: 'Practicas Calificadas (U3)', mandatory: false },
+    { type: 'item', key: 'url_trabajos_encargados_estudiante_u3', label: 'Trabajos encargados (U3)', mandatory: true },
     { type: 'item', key: 'url_otros_recursos_estudiante_u3', label: 'Otros Recursos', mandatory: false },
     { type: 'subcategory', label: '6.4. Proyectos Finales' },
     { type: 'item', key: 'url_proyectos_finales_u3', label: 'Carpeta Principal de Proyectos (U3)', mandatory: true }
@@ -446,8 +455,8 @@ function displayCourses(courses, teacherName) {
                 const buttonClass = isComplete ? 'btn-state-completed' : 'btn-state-pending';
                 const buttonText = isComplete ? 'Portafolio Completado' : 'Portafolio Pendiente';
                 buttonsHtml += `<button class="btn ${buttonClass}" data-report-type="${selectedReportType}">${buttonText}</button>`;
-                if (portfolioReportInfo.url) buttonsHtml += `<a href="${portfolioReportInfo.url}" target="_blank" class="btn">Ver Archivo</a>`;
-            } else {
+
+            if (portfolioReportInfo.url_informe) buttonsHtml += `<a href="${portfolioReportInfo.url_informe}" target="_blank" class="btn">Ver Archivo</a>`;            } else {
                 buttonsHtml += `<button class="btn btn-state-new" data-report-type="${selectedReportType}">Hacer Portafolio (U${unit})</button>`;
             }
         } else if (selectedReportType === 'docPortfolio') {
@@ -680,7 +689,7 @@ function buildDocPortfolioForm(reportData) {
     document.getElementById('refresh-doc-status').onclick = () => {
         const btn = document.getElementById('refresh-doc-status');
         btn.disabled = true;
-        btn.innerHTML = `<div class="spinner" style="width:18px; height:18px; border-width:2px;"></div> Refrescando...`;
+        btn.innerHTML = `<div class="spinner" style="width:18px; height:18px; border-width:2px; margin: 0 auto;"></div>`;
         openDocPortfolioModal();
     };
 }
@@ -811,46 +820,94 @@ function calculatePortfolio() {
 }
 
 saveReportBtn.addEventListener('click', async () => {
-    saveReportBtn.disabled = true; saveReportBtn.innerHTML = `<div class="spinner" style="width:20px; height:20px; border-width:3px; margin:auto;"></div>`; finalResponseDiv.innerHTML = '';
-    const reportData = { uniqueId: currentReportId, semestre: selectedSemester, matriculados: matriculadosInput.value, evaluados: evaluadosInput.value, course: currentCourseData, docente: currentTeacherData, skills: Array.from(skillsContainer.querySelectorAll('.skill-row')).map(row => { const totalEvaluados = parseInt(evaluadosInput.value) || 0; const def = parseInt(row.querySelector('[data-level="deficiente"]').value) || 0, suf = parseInt(row.querySelector('[data-level="suficiente"]').value) || 0, bue = parseInt(row.querySelector('[data-level="bueno"]').value) || 0; return { name: row.querySelector('input[type="text"]').value, deficiente_cantidad: def, deficiente_porcentaje: totalEvaluados > 0 ? (def / totalEvaluados) : 0, suficiente_cantidad: suf, suficiente_porcentaje: totalEvaluados > 0 ? (suf / totalEvaluados) : 0, bueno_cantidad: bue, bueno_porcentaje: totalEvaluados > 0 ? (bue / totalEvaluados) : 0, total_porcentaje: totalEvaluados > 0 ? ((def + suf + bue) / totalEvaluados) : 0 }; }).filter(skill => skill.name.trim() !== ''), correctiveMeasures: { repaso_clase: chkRepasoClase.checked, repaso_adicional: chkRepasoAdicional.checked, ejercicios_casa: chkEjerciciosCasa.checked, entrega_material: chkEntregaMaterial.checked, recomendacion_biblio: chkRecomendacionBiblio.checked, otros_check: chkOtros.checked, otros_descripcion: txtOtrosDescripcion.value, fecha: inputFecha.value }, signatureBase64: (signaturePadWrapper.style.display !== 'none' && entrySignaturePad && !entrySignaturePad.isEmpty()) ? entrySignaturePad.toDataURL('image/png') : null, existingSignatureUrl: (currentReportId && existingEntryReports[currentReportId]) ? existingEntryReports[currentReportId].signatureImageUrl : null };
+    const originalButtonText = saveReportBtn.innerHTML;
+    saveReportBtn.disabled = true;
+    saveReportBtn.innerHTML = `<div class="spinner" style="width:18px; height:18px; border-width:2px; margin-right: 8px;"></div> Guardando...`;
+    finalResponseDiv.innerHTML = '';
+    const reportData = {
+        uniqueId: currentReportId,
+        semestre: selectedSemester,
+        matriculados: matriculadosInput.value,
+        evaluados: evaluadosInput.value,
+        course: currentCourseData,
+        docente: currentTeacherData,
+        skills: Array.from(skillsContainer.querySelectorAll('.skill-row')).map(row => { const totalEvaluados = parseInt(evaluadosInput.value) || 0; const def = parseInt(row.querySelector('[data-level="deficiente"]').value) || 0, suf = parseInt(row.querySelector('[data-level="suficiente"]').value) || 0, bue = parseInt(row.querySelector('[data-level="bueno"]').value) || 0; return { name: row.querySelector('input[type="text"]').value, deficiente_cantidad: def, deficiente_porcentaje: totalEvaluados > 0 ? (def / totalEvaluados) : 0, suficiente_cantidad: suf, suficiente_porcentaje: totalEvaluados > 0 ? (suf / totalEvaluados) : 0, bueno_cantidad: bue, bueno_porcentaje: totalEvaluados > 0 ? (bue / totalEvaluados) : 0, total_porcentaje: totalEvaluados > 0 ? ((def + suf + bue) / totalEvaluados) : 0 }; }).filter(skill => skill.name.trim() !== ''),
+        correctiveMeasures: { repaso_clase: chkRepasoClase.checked, repaso_adicional: chkRepasoAdicional.checked, ejercicios_casa: chkEjerciciosCasa.checked, entrega_material: chkEntregaMaterial.checked, recomendacion_biblio: chkRecomendacionBiblio.checked, otros_check: chkOtros.checked, otros_descripcion: txtOtrosDescripcion.value, fecha: inputFecha.value },
+        signatureBase64: (signaturePadWrapper.style.display !== 'none' && entrySignaturePad && !entrySignaturePad.isEmpty()) ? entrySignaturePad.toDataURL('image/png') : null,
+        existingSignatureUrl: (currentReportId && existingEntryReports[currentReportId]) ? existingEntryReports[currentReportId].signatureImageUrl : null
+    };
+    
     const statusText = document.getElementById('entryTestStatusIndicator').textContent || '';
     reportData.status = statusText.replace('Estado: ', '');
     try {
         const response = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'saveReport', reportType: 'entryTest', data: reportData }) });
         const result = await response.json();
         if (result.success) {
-            refreshOnClose = true; saveReportBtn.style.display = 'none'; addSkillBtn.style.display = 'none';
+            refreshOnClose = true;
+            saveReportBtn.style.display = 'none';
+            addSkillBtn.style.display = 'none';
             finalResponseDiv.innerHTML = `✅ ¡Informe Guardado! <a href="${result.url}" target="_blank">Abrir Archivo</a>`;
-        } else { throw new Error(result.message || 'Error desconocido.'); }
+        } else {
+            throw new Error(result.message || 'Error desconocido.');
+        }
     } catch (error) {
         finalResponseDiv.innerHTML = `<span style="color:var(--danger-color)">Error: ${error.message}</span>`;
-        saveReportBtn.innerHTML = 'Guardar Informe'; saveReportBtn.disabled = false;
+        saveReportBtn.innerHTML = originalButtonText;
+        saveReportBtn.disabled = false;
     }
 });
 
 savePortfolioBtn.addEventListener('click', async () => {
+    const originalButtonText = savePortfolioBtn.innerHTML;
     savePortfolioBtn.disabled = true;
-    savePortfolioBtn.innerHTML = `<div class="spinner" style="width:20px; height:20px; border-width:3px; margin:auto;"></div>`;
-    finalResponsePortfolioDiv.innerHTML = 'Enviando datos...';
+    savePortfolioBtn.innerHTML = `<div class="spinner" style="width:18px; height:18px; border-width:2px; margin-right: 8px;"></div> Guardando...`;
+    finalResponsePortfolioDiv.innerHTML = '';
+
     const reportInfo = existingPortfolioReports[currentReportId];
-    const portfolioData = { uniqueId: currentReportId, semestre: selectedSemester, course: currentCourseData, docente: currentTeacherData, matriculados: p_matriculados.value, retirados: p_retirados.value, abandono: p_abandono.value, asisten: p_asisten.value, aprobados: p_aprobados.value, desaprobados: p_desaprobados.value, matriculados_pct: (parseFloat(document.getElementById('p_matriculados_span').textContent) || 0) / 100, retirados_pct: (parseFloat(document.getElementById('p_retirados_span').textContent) || 0) / 100, abandono_pct: (parseFloat(document.getElementById('p_abandono_span').textContent) || 0) / 100, asisten_pct: (parseFloat(document.getElementById('p_asisten_span').textContent) || 0) / 100, aprobados_pct: (parseFloat(document.getElementById('p_aprobados_span').textContent) || 0) / 100, desaprobados_pct: (parseFloat(document.getElementById('p_desaprobados_span').textContent) || 0) / 100, fecha_entrega: inputFechaPortfolio.value, signatureBase64: (signaturePadWrapperPortfolio.style.display !== 'none' && portfolioSignaturePad && !portfolioSignaturePad.isEmpty()) ? portfolioSignaturePad.toDataURL('image/png') : null, existingSignatureUrl: (reportInfo) ? reportInfo.signatureImageUrl : null };
+    const portfolioData = {
+        uniqueId: currentReportId,
+        semestre: selectedSemester,
+        course: currentCourseData,
+        docente: currentTeacherData,
+        matriculados: p_matriculados.value,
+        retirados: p_retirados.value,
+        abandono: p_abandono.value,
+        asisten: p_asisten.value,
+        aprobados: p_aprobados.value,
+        desaprobados: p_desaprobados.value,
+        matriculados_pct: (parseFloat(document.getElementById('p_matriculados_span').textContent) || 0) / 100,
+        retirados_pct: (parseFloat(document.getElementById('p_retirados_span').textContent) || 0) / 100,
+        abandono_pct: (parseFloat(document.getElementById('p_abandono_span').textContent) || 0) / 100,
+        asisten_pct: (parseFloat(document.getElementById('p_asisten_span').textContent) || 0) / 100,
+        aprobados_pct: (parseFloat(document.getElementById('p_aprobados_span').textContent) || 0) / 100,
+        desaprobados_pct: (parseFloat(document.getElementById('p_desaprobados_span').textContent) || 0) / 100,
+        fecha_entrega: inputFechaPortfolio.value,
+        signatureBase64: (signaturePadWrapperPortfolio.style.display !== 'none' && portfolioSignaturePad && !portfolioSignaturePad.isEmpty()) ? portfolioSignaturePad.toDataURL('image/png') : null,
+        existingSignatureUrl: (reportInfo) ? reportInfo.signatureImageUrl : null
+    };
     materialKeys.forEach(key => {
         portfolioData[`dig_${key}`] = document.getElementById(`dig_${key}`).checked;
         portfolioData[`imp_${key}`] = document.getElementById(`imp_${key}`).checked;
         portfolioData[`cant_${key}`] = document.getElementById(`cant_${key}`).value;
     });
+
     const statusText = document.getElementById('portfolioStatusIndicator').textContent || '';
     portfolioData.status = statusText.replace('Estado: ', '');
+    
     try {
         const response = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'saveReport', reportType: selectedReportType, data: portfolioData }) });
         const result = await response.json();
         if (result.success) {
-            refreshOnClose = true; savePortfolioBtn.style.display = 'none';
+            refreshOnClose = true;
+            savePortfolioBtn.style.display = 'none';
             finalResponsePortfolioDiv.innerHTML = `✅ ¡Datos Guardados! <a href="${result.url}" target="_blank">Abrir Archivo</a>`;
-        } else { throw new Error(result.message || 'Error desconocido.'); }
+        } else {
+            throw new Error(result.message || 'Error desconocido.');
+        }
     } catch (error) {
         finalResponsePortfolioDiv.innerHTML = `<span style="color:var(--danger-color)">Error: ${error.message}</span>`;
-        savePortfolioBtn.innerHTML = 'Guardar Datos'; savePortfolioBtn.disabled = false;
+        savePortfolioBtn.innerHTML = originalButtonText;
+        savePortfolioBtn.disabled = false;
     }
 });
 
@@ -862,12 +919,11 @@ saveDocPortfolioBtn.addEventListener('click', async () => {
         return;
     }
     
+    const originalButtonText = saveDocPortfolioBtn.innerHTML;
     saveDocPortfolioBtn.disabled = true;
-    saveDocPortfolioBtn.innerHTML = `<div class="spinner" style="width:20px; height:20px; border-width:3px; margin:auto;"></div>`;
-    finalResponseDocPortfolioDiv.innerHTML = 'Guardando firma y finalizando...';
+    saveDocPortfolioBtn.innerHTML = `<div class="spinner" style="width:18px; height:18px; border-width:2px; margin-right: 8px;"></div> Guardando...`;
 
     const reportInfo = existingDocPortfolioReports[currentReportId];
-
     const docPortfolioData = {
         uniqueId: currentReportId,
         course: currentCourseData,
@@ -892,8 +948,7 @@ saveDocPortfolioBtn.addEventListener('click', async () => {
         }
     } catch (error) {
         finalResponseDocPortfolioDiv.innerHTML = `<span style="color:var(--danger-color)">Error: ${error.message}</span>`;
-        saveDocPortfolioBtn.innerHTML = 'Guardar Firma y Finalizar';
+        saveDocPortfolioBtn.innerHTML = originalButtonText;
         saveDocPortfolioBtn.disabled = false;
     }
-
 });
