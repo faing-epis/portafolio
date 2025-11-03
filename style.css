@@ -85,24 +85,31 @@ h1 {
     width: 95%; box-shadow: var(--box-shadow-hover);
     border: 1px solid rgba(255, 255, 255, 0.9);
     position: relative;
+    display: flex; /* <-- AÑADIDO */
+    flex-direction: column; /* <-- AÑADIDO */
+    max-height: 90vh; /* <-- AÑADIDO: Limita la altura máxima */
+}
+.modal-body {
+    overflow-y: auto; /* <-- AÑADIDO: Activa el scroll si el contenido es largo */
+    padding-right: 10px; /* Espacio para el scrollbar */
 }
 .modal-close {
     position: absolute; top: 16px; right: 20px; font-size: 18px;
     font-weight: normal; cursor: pointer; color: var(--text-secondary);
     transition: color var(--transition-speed);
+    z-index: 10;
 }
 .modal-close:hover { color: var(--text-primary); }
 
 #semesterModal, #passwordModal { display: flex; }
-#semesterModal .modal-content, #passwordModal .modal-content { max-width: 380px; text-align: center; }
-#semesterModal h2, #passwordModal h2 { color: var(--primary-color); margin-top: 0; margin-bottom: 24px; font-weight: 600; }
+#semesterModal .modal-content, #passwordModal .modal-content { max-width: 380px; text-align: center; max-height: none; } /* Resetea max-height para modales pequeños */
 #semesterLoader, #passwordLoader { display: none; margin-top: 15px; }
 #passwordModal { display: none; } /* Oculto por defecto */
 #passwordValidationMessage { color: var(--danger-color); height: 20px; font-weight: 500; margin-top: 10px;}
 
 /* --- Formularios y Entradas (Estilo Fluent) --- */
 .form-section { margin-bottom: 24px; }
-.form-section label {
+.form-section label, .form-grid label, .form-grid-textareas label {
     font-weight: 600; display: block; margin-bottom: 8px; font-size: 0.9em;
     color: var(--text-secondary);
 }
@@ -214,8 +221,8 @@ input::placeholder { color: #a1a1a1; }
 }
 
 /* --- Controles de Modales --- */
-.modal-header { position: relative; }
-.modal-header h2 { font-weight: 600; font-size: 1.5em; margin-bottom: 24px; color: var(--primary-color); }
+.modal-header { position: relative; padding-bottom: 16px; }
+.modal-header h2 { font-weight: 600; font-size: 1.5em; margin: 0; color: var(--primary-color); }
 .modal-header h2 small { font-size: 0.7em; color: var(--text-secondary); font-weight: 400; display: block; margin-top: 4px; }
 .status-indicator {
     position: absolute; top: 0; right: 0;
@@ -226,8 +233,8 @@ input::placeholder { color: #a1a1a1; }
     display: flex; justify-content: flex-end; align-items: center; margin-top: 24px;
     border-top: 1px solid var(--surface-border-light); padding-top: 24px;
 }
-#final-response, #final-response-portfolio, #final-response-doc-portfolio { flex-grow: 1; text-align: left; font-weight: 500; }
-#final-response a, #final-response-portfolio a, #final-response-doc-portfolio a { color: var(--primary-color); text-decoration: none; font-weight: 600; }
+#final-response, #final-response-portfolio, #final-response-doc-portfolio, #final-response-final-report { flex-grow: 1; text-align: left; font-weight: 500; }
+#final-response a, #final-response-portfolio a, #final-response-doc-portfolio a, #final-response-final-report a { color: var(--primary-color); text-decoration: none; font-weight: 600; }
 
 /* --- ESTILO DE PORCENTAJE UNIFICADO --- */
 .percent, .percentage {
@@ -240,7 +247,7 @@ input::placeholder { color: #a1a1a1; }
 .pct-bg-red { background-color: var(--danger-bg); color: var(--danger-color); }
 
 /* --- Modal de Prueba de Entrada --- */
-#reportModal .modal-content { max-width: 1024px; max-height: 90vh; overflow-y: auto; }
+#reportModal .modal-content { max-width: 1024px; }
 .skills-header, .skill-row {
     display: grid; grid-template-columns: 2.5fr 1fr 0.8fr 1fr 0.8fr 1fr 0.8fr 1fr 40px;
     gap: 12px; align-items: center;
@@ -256,7 +263,7 @@ input::placeholder { color: #a1a1a1; }
 .corrective-measures h4, .signature-section h4 { color: var(--text-primary); font-weight: 600; margin-bottom: 16px; font-size: 1.1em; }
 .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .checkbox-group { display: flex; align-items: center; gap: 10px; }
-.checkbox-group label { font-size: 0.95em; }
+.checkbox-group label { font-size: 0.95em; margin: 0; }
 
 /* --- Firma --- */
 .signature-pad-wrapper { border: 2px dashed var(--surface-border); border-radius: var(--border-radius); position: relative; height: 180px; background: #fff; }
@@ -264,10 +271,10 @@ canvas { width: 100%; height: 100%; cursor: crosshair; touch-action: none; }
 .existing-signature-wrapper iframe { width: 100%; height: 180px; border: 1px solid var(--surface-border); border-radius: var(--border-radius); }
 
 /* --- Modal Portafolio --- */
-#portfolioModal .modal-content { max-width: 1024px; max-height: 90vh; overflow-y: auto; }
+#portfolioModal .modal-content { max-width: 1024px; }
 .portfolio-grid { display: grid; grid-template-columns: 1.5fr 1fr 1.5fr; gap: 12px; align-items: center; }
 .portfolio-grid .grid-header { font-weight: 600; color: var(--text-secondary); padding: 8px 0; border-bottom: 1px solid var(--surface-border); font-size: 0.8em; text-transform: uppercase; }
-.portfolio-grid label { font-weight: 600; }
+.portfolio-grid label { font-weight: 600; margin: 0; }
 input:read-only { background-color: var(--surface-border-light); font-weight: 600; border-color: transparent; }
 .portfolio-grid .percentage { position: relative; overflow: hidden; height: 38px; display: flex; justify-content: center; align-items: center; }
 .portfolio-grid .sub-group { padding-left: 20px; border-left: 2px solid var(--surface-border-light); }
@@ -281,11 +288,11 @@ input:read-only { background-color: var(--surface-border-light); font-weight: 60
     margin-top: 20px;
 }
 .material-grid .grid-header { font-weight: 600; text-align: center; color: var(--text-secondary); font-size: 0.8em; text-transform: uppercase; }
-.material-grid label { font-size: 0.95em; }
+.material-grid label { font-size: 0.95em; margin: 0; }
 .material-grid input[type="checkbox"] { justify-self: center; width: 18px; height: 18px; }
 
 /* --- Modal Documentación --- */
-#docPortfolioModal .modal-content { max-width: 800px; max-height: 90vh; overflow-y: auto; }
+#docPortfolioModal .modal-content { max-width: 800px; }
 .doc-category { font-weight: 600; color: var(--primary-color); margin-top: 24px; padding-bottom: 8px; font-size: 1.1em; }
 .doc-subcategory { font-weight: 600; color: var(--text-primary); margin-top: 16px; margin-left: 15px; font-size: 1em; }
 
@@ -302,6 +309,7 @@ input:read-only { background-color: var(--surface-border-light); font-weight: 60
 .doc-item label {
     font-size: 0.95em;
     color: var(--text-secondary);
+    margin: 0;
 }
 .doc-item-controls {
     display: flex;
@@ -317,7 +325,7 @@ input:read-only { background-color: var(--surface-border-light); font-weight: 60
 .mandatory-star { color: var(--orange-color); font-weight: 600; }
 .mandatory-legend { font-size: 0.8em; color: var(--text-secondary); }
 
-/* --- [NUEVO] Estilo para la ventana flotante (Tooltip) --- */
+/* --- Tooltip --- */
 .tooltip {
   position: relative;
   display: inline-block;
@@ -357,6 +365,36 @@ input:read-only { background-color: var(--surface-border-light); font-weight: 60
 .tooltip:hover .tooltiptext {
   visibility: visible;
   opacity: 1;
+}
+
+/* --- AÑADIDO: Estilos para la tabla de Logros del Informe Final --- */
+.styled-table {
+    border-collapse: collapse;
+    font-size: 0.9em;
+}
+.styled-table thead th {
+    background-color: var(--surface-ground);
+    padding: 10px 12px;
+    text-align: center;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+.styled-table td, .styled-table th {
+    border: 1px solid var(--surface-border);
+}
+.styled-table td:first-child {
+    width: 40%;
+}
+.styled-table td input[type="text"] {
+    border: none;
+    background: transparent;
+}
+.styled-table td input[type="text"]:focus {
+    box-shadow: none;
+    background-color: var(--primary-color-light);
+}
+.styled-table .radio-cell {
+    text-align: center;
 }
 
 @media (max-width: 768px) {
