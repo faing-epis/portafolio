@@ -1,4 +1,4 @@
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw3SV6EvFXemwPzEaKlf8rPlc9hcMBqTqeTwMWoCJDPI2eU_kichHzNxmDiuDIudJZ0/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbznx9vMo36374ZLPm_bC0p-mUCTYFyCW6-VAFJC8j9gp5EkdBkU_FGmGq3QMjDPNwmh/exec";
 
 // --- Selectores del DOM ---
 const semesterSelector = document.getElementById('semester-selector');
@@ -193,3 +193,4 @@ function exportToCsv() {
     document.body.removeChild(link);
 
 }
+
