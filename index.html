@@ -58,6 +58,7 @@
                     <option value="portfolio_I">Portafolio por Unidad I</option>
                     <option value="portfolio_II">Portafolio por Unidad II</option>
                     <option value="portfolio_III">Portafolio por Unidad III</option>
+                    <option value="finalReport">Informe Final de Curso</option> <!-- <-- AÑADIDO -->
                     <option value="docPortfolio">Documentación de Portafolio de Curso</option>
                 </select>
             </div>
@@ -335,6 +336,173 @@
             <div class="modal-footer">
                 <div id="final-response-doc-portfolio"></div>
                 <button id="saveDocPortfolioBtn" class="btn primary btn-save">Guardar Firma y Finalizar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================== -->
+    <!-- --- AÑADIDO: MODAL PARA INFORME FINAL DE CURSO --- -->
+    <!-- ================================================================== -->
+    <div id="finalReportModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 1100px;">
+            <span class="modal-close">×</span>
+            <div class="modal-header">
+                <h2 id="finalReportModalTitle">Informe Final del Curso</h2>
+                <div id="finalReportStatusIndicator" class="status-indicator"></div>
+            </div>
+            <div class="modal-body">
+                
+                <!-- SECCIÓN 1: RESUMEN DEL CURSO -->
+                <h4>Resumen del Curso</h4>
+                <div class="portfolio-grid">
+                    <div class="grid-header">Estudiantes</div>
+                    <div class="grid-header">Cantidad</div>
+                    <div class="grid-header">Porcentaje</div>
+                    
+                    <label for="if_matriculados">Matriculados</label>
+                    <input type="number" id="if_matriculados" min="0">
+                    <div class="percentage pct-bg-green"><span id="if_matriculados_span">100%</span></div>
+
+                    <div class="grid-row sub-group" style="grid-column: 1 / -1; display: contents;">
+                        <label for="if_retirados">Retirados</label>
+                        <input type="number" id="if_retirados" min="0">
+                        <div class="percentage" style="background: transparent;"><span id="if_retirados_span">0%</span></div>
+                    </div>
+                    <div class="grid-row sub-group" style="grid-column: 1 / -1; display: contents;">
+                        <label for="if_abandono">Abandono</label>
+                        <input type="number" id="if_abandono" min="0">
+                        <div class="percentage" style="background: transparent;"><span id="if_abandono_span">0%</span></div>
+                    </div>
+
+                    <label for="if_asisten">Asisten</label>
+                    <input type="number" id="if_asisten" readonly>
+                    <div class="percentage"><span id="if_asisten_span">0%</span></div>
+
+                    <div class="grid-row sub-group" style="grid-column: 1 / -1; display: contents;">
+                        <label for="if_aprobados">Aprobados</label>
+                        <input type="number" id="if_aprobados" min="0">
+                        <div class="percentage" style="background: transparent;"><span id="if_aprobados_span">0%</span></div>
+                    </div>
+                    <div class="grid-row sub-group" style="grid-column: 1 / -1; display: contents;">
+                        <label for="if_desaprobados">Desaprobados</label>
+                        <input type="number" id="if_desaprobados" readonly>
+                        <div class="percentage" style="background: transparent;"><span id="if_desaprobados_span">0%</span></div>
+                    </div>
+                </div>
+                <div id="finalReportValidationMsg" class="validation-message-small" style="text-align:center; color: var(--danger-color); height: 20px; margin-top:10px;"></div>
+                
+                <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 24px;">
+                    <div><label for="if_porc_silabo">% Cumplimiento Sílabo</label><input type="text" id="if_porc_silabo" placeholder="Ej: 95%"></div>
+                    <div><label for="if_practicas_realizadas">Prácticas Realizadas</label><input type="number" id="if_practicas_realizadas" min="0"></div>
+                    <div><label for="if_lab_realizadas">Laboratorios Realizados</label><input type="number" id="if_lab_realizadas" min="0"></div>
+                    <div><label for="if_proyectos_realizados">Proyectos Realizados</label><input type="number" id="if_proyectos_realizados" min="0"></div>
+                    <div><label for="if_nota_alta">Nota más Alta</label><input type="number" id="if_nota_alta" min="0" max="20" step="0.5"></div>
+                    <div><label for="if_nota_promedio">Nota Promedio</label><input type="number" id="if_nota_promedio" min="0" max="20" step="0.01"></div>
+                    <div><label for="if_nota_baja">Nota más Baja</label><input type="number" id="if_nota_baja" min="0" max="20" step="0.5"></div>
+                </div>
+
+                <hr>
+
+                <!-- SECCIÓN 2: LOGROS DE CAPACIDADES -->
+                <h4>Logros de capacidades del curso</h4>
+                <p class="form-section-description" style="color: var(--text-secondary); font-size: 0.9em;">Según su apreciación, ingrese el nombre de cada Resultado de Aprendizaje y marque el nivel alcanzado por los estudiantes.</p>
+                <table id="logros-table" class="styled-table" style="width:100%; margin-top:16px;">
+                    <thead><tr><th>Resultado de Aprendizaje (RA)</th><th>N (Nada)</th><th>P (Poco)</th><th>A (Aceptable)</th><th>B (Bien)</th><th>M (Muy Bien)</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="text" id="if_ra1_nombre" placeholder="Nombre del RA 1..."></td>
+                            <td class="radio-cell"><input type="radio" name="if_ra1_nivel" value="N"></td>
+                            <td class="radio-cell"><input type="radio" name="if_ra1_nivel" value="P"></td>
+                            <td class="radio-cell"><input type="radio" name="if_ra1_nivel" value="A"></td>
+                            <td class="radio-cell"><input type="radio" name="if_ra1_nivel" value="B"></td>
+                            <td class="radio-cell"><input type="radio" name="if_ra1_nivel" value="M"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="if_ra2_nombre" placeholder="Nombre del RA 2..."></td>
+                            <td class="radio-cell"><input type="radio" name="if_ra2_nivel" value="N"></td>
+                            <td class="radio-cell"><input type="radio" name="if_ra2_nivel" value="P"></td>
+                            <td class="radio-cell"><input type="radio" name="if_ra2_nivel" value="A"></td>
+                            <td class="radio-cell"><input type="radio" name="if_ra2_nivel" value="B"></td>
+                            <td class="radio-cell"><input type="radio" name="if_ra2_nivel" value="M"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="if_ra3_nombre" placeholder="Nombre del RA 3..."></td>
+                            <td class="radio-cell"><input type="radio" name="if_ra3_nivel" value="N"></td>
+                            <td class="radio-cell"><input type="radio" name="if_ra3_nivel" value="P"></td>
+                            <td class="radio-cell"><input type="radio" name="if_ra3_nivel" value="A"></td>
+                            <td class="radio-cell"><input type="radio" name="if_ra3_nivel" value="B"></td>
+                            <td class="radio-cell"><input type="radio" name="if_ra3_nivel" value="M"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="if_ra4_nombre" placeholder="Nombre del RA 4..."></td>
+                            <td class="radio-cell"><input type="radio" name="if_ra4_nivel" value="N"></td>
+                            <td class="radio-cell"><input type="radio" name="if_ra4_nivel" value="P"></td>
+                            <td class="radio-cell"><input type="radio" name="if_ra4_nivel" value="A"></td>
+                            <td class="radio-cell"><input type="radio" name="if_ra4_nivel" value="B"></td>
+                            <td class="radio-cell"><input type="radio" name="if_ra4_nivel" value="M"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="if_ra5_nombre" placeholder="Nombre del RA 5..."></td>
+                            <td class="radio-cell"><input type="radio" name="if_ra5_nivel" value="N"></td>
+                            <td class="radio-cell"><input type="radio" name="if_ra5_nivel" value="P"></td>
+                            <td class="radio-cell"><input type="radio" name="if_ra5_nivel" value="A"></td>
+                            <td class="radio-cell"><input type="radio" name="if_ra5_nivel" value="B"></td>
+                            <td class="radio-cell"><input type="radio" name="if_ra5_nivel" value="M"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <hr>
+
+                <!-- SECCIÓN 3: OBSERVACIONES -->
+                <h4>Observaciones</h4>
+                <div class="form-grid-textareas" style="display: flex; flex-direction: column; gap: 16px;">
+                    <div><label for="if_obs_motivo_no_logro">Motivo por el cual los estudiantes no alcanzaron el logro de capacidades:</label><textarea id="if_obs_motivo_no_logro" rows="3"></textarea></div>
+                    <div><label for="if_obs_estudiantes">De los estudiantes (Nivel académico, conocimientos previos, interés, etc.):</label><textarea id="if_obs_estudiantes" rows="3"></textarea></div>
+                    <div><label for="if_obs_asistencia">Asistencia y puntualidad de los estudiantes:</label><textarea id="if_obs_asistencia" rows="3"></textarea></div>
+                    <div><label for="if_obs_silabo">Del sílabo (Temas no completados, temas adecuados, etc.):</label><textarea id="if_obs_silabo" rows="3"></textarea></div>
+                    <div><label for="if_obs_administrativas">Administrativas (Disponibilidad de recursos en aulas y laboratorios):</label><textarea id="if_obs_administrativas" rows="3"></textarea></div>
+                    <div><label for="if_obs_competencias">Sílabo por competencias (Actividades de evaluación realizadas):</label><textarea id="if_obs_competencias" rows="3"></textarea></div>
+                    <div><label for="if_obs_mejora_continua">Mejora continua (Actividades realizadas y propuestas):</label><textarea id="if_obs_mejora_continua" rows="3"></textarea></div>
+                    <div><label for="if_obs_actualizacion_docente">Actualización docente (Cursos de actualización en los últimos dos años):</label><textarea id="if_obs_actualizacion_docente" rows="3"></textarea></div>
+                    <div><label for="if_obs_recomendaciones">Comentarios y Recomendaciones para mejorar el Plan de Estudios:</label><textarea id="if_obs_recomendaciones" rows="3"></textarea></div>
+                </div>
+                
+                <h5 style="margin-top:24px; margin-bottom:10px;">Uso del Aula Virtual</h5>
+                <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
+                    <div><label for="if_av_material_curso">Material del curso</label><input type="text" id="if_av_material_curso"></div>
+                    <div><label for="if_av_cuestionarios">Cuestionarios</label><input type="text" id="if_av_cuestionarios"></div>
+                    <div><label for="if_av_tareas">Tareas Encargadas</label><input type="text" id="if_av_tareas"></div>
+                    <div><label for="if_av_foros">Foros</label><input type="text" id="if_av_foros"></div>
+                    <div><label for="if_av_examenes">Exámenes virtuales</label><input type="text" id="if_av_examenes"></div>
+                    <div><label for="if_av_slideshow">Slideshow</label><input type="text" id="if_av_slideshow"></div>
+                </div>
+
+                <hr>
+                
+                <!-- SECCIÓN 4: FIRMA Y FECHA -->
+                <div>
+                    <label for="if_fecha_informe">Fecha del Informe:</label>
+                    <input type="date" id="if_fecha_informe" style="width: auto;">
+                </div>
+                <div class="signature-section" style="margin-top: 24px;">
+                    <h4>Firma del Docente <span class="mandatory-star">*</span></h4>
+                    <div id="signature_pad_wrapper_final" class="signature-pad-wrapper">
+                        <canvas id="signature_canvas_final"></canvas>
+                    </div>
+                    <div id="existing_signature_wrapper_final" class="existing-signature-wrapper" style="display: none;">
+                        <p><strong>Firma guardada:</strong></p>
+                        <iframe id="existing_signature_iframe_final" src="" allow="autoplay"></iframe>
+                    </div>
+                    <div class="signature-controls" style="margin-top: 10px; display: flex; justify-content: flex-end;">
+                        <button id="clear_signature_btn_final" class="btn">Limpiar Firma</button>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <div id="final-response-final-report"></div>
+                <button id="saveFinalReportBtn" class="btn primary btn-save">Guardar Informe Final</button>
             </div>
         </div>
     </div>
