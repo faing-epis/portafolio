@@ -1,4 +1,4 @@
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxUq1_c1S-RembuexL86W3p4gQKJ_kWPp0L7WQUVi8F93DPRiu-MSqsHfBNodU7laqK/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw3SV6EvFXemwPzEaKlf8rPlc9hcMBqTqeTwMWoCJDPI2eU_kichHzNxmDiuDIudJZ0/exec";
 
 // --- Selectores del DOM ---
 const semesterSelector = document.getElementById('semester-selector');
