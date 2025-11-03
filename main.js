@@ -1,4 +1,4 @@
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxUq1_c1S-RembuexL86W3p4gQKJ_kWPp0L7WQUVi8F93DPRiu-MSqsHfBNodU7laqK/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw3SV6EvFXemwPzEaKlf8rPlc9hcMBqTqeTwMWoCJDPI2eU_kichHzNxmDiuDIudJZ0/exec";
 
 // --- Selectores de Elementos DOM ---
 const semesterModal = document.getElementById('semesterModal');
@@ -75,6 +75,19 @@ const passwordLoader = document.getElementById('passwordLoader');
 const passwordValidationMessage = document.getElementById('passwordValidationMessage');
 const passwordModalText = document.getElementById('passwordModalText');
 
+// --- AÑADIDO: Selectores para el Modal de Informe Final ---
+const finalReportModal = document.getElementById('finalReportModal');
+const finalReportModalTitle = document.getElementById('finalReportModalTitle');
+const finalReportStatusIndicator = document.getElementById('finalReportStatusIndicator');
+const saveFinalReportBtn = document.getElementById('saveFinalReportBtn');
+const finalResponseFinalReportDiv = document.getElementById('final-response-final-report');
+const signaturePadWrapperFinal = document.getElementById('signature_pad_wrapper_final');
+const signatureCanvasFinal = document.getElementById('signature_canvas_final');
+const clearSignatureBtnFinal = document.getElementById('clear_signature_btn_final');
+const existingSignatureWrapperFinal = document.getElementById('existing_signature_wrapper_final');
+const existingSignatureIframeFinal = document.getElementById('existing_signature_iframe_final');
+
+
 // --- Variables Globales ---
 let allTeachers = [];
 let currentCourseData = {};
@@ -84,10 +97,12 @@ let selectedReportType = '';
 let existingEntryReports = {};
 let existingPortfolioReports = {};
 let existingDocPortfolioReports = {};
+let existingFinalReports = {}; // <-- AÑADIDO
 let currentReportId = null;
 let entrySignaturePad;
 let portfolioSignaturePad;
 let docPortfolioSignaturePad;
+let finalReportSignaturePad; // <-- AÑADIDO
 let refreshOnClose = false;
 
 // --- Estructura de Portafolio con los 45 campos y campos obligatorios corregidos ---
@@ -175,6 +190,7 @@ window.addEventListener('resize', () => {
     resizeCanvas(signatureCanvas, entrySignaturePad);
     resizeCanvas(signatureCanvasPortfolio, portfolioSignaturePad);
     resizeCanvas(signatureCanvasDoc, docPortfolioSignaturePad);
+    resizeCanvas(signatureCanvasFinal, finalReportSignaturePad); // <-- AÑADIDO
 });
 
 clearSignatureBtn.addEventListener('click', () => {
@@ -220,6 +236,22 @@ clearSignatureBtnDoc.addEventListener('click', () => {
         }, 50);
      }
 });
+
+// --- AÑADIDO: Evento para el botón de limpiar firma del Informe Final ---
+clearSignatureBtnFinal.addEventListener('click', () => {
+     if (signaturePadWrapperFinal.style.display !== 'none' && finalReportSignaturePad) {
+        finalReportSignaturePad.clear();
+     } else {
+        existingSignatureWrapperFinal.style.display = 'none';
+        signaturePadWrapperFinal.style.display = 'block';
+        clearSignatureBtnFinal.textContent = 'Limpiar Firma';
+        setTimeout(() => {
+            finalReportSignaturePad = new SignaturePad(signatureCanvasFinal, { backgroundColor: 'rgb(255, 255, 255)' });
+            resizeCanvas(signatureCanvasFinal, finalReportSignaturePad);
+        }, 50);
+     }
+});
+
 
 loadSemesterBtn.addEventListener('click', async () => {
     selectedSemester = semesterSelector.value;
@@ -369,6 +401,7 @@ async function performSearch(teacherName) {
             existingEntryReports = result.data.existingEntryReports;
             existingPortfolioReports = result.data.existingPortfolioReports;
             existingDocPortfolioReports = result.data.existingDocPortfolioReports;
+            existingFinalReports = result.data.existingFinalReports; // <-- AÑADIDO
             displayTeacherDetails(result.data.details);
             displayCourses(result.data.courses, teacherName);
         } else { throw new Error(result.message); }
@@ -423,6 +456,10 @@ function isDocPortfolioComplete(reportInfo) {
     return reportInfo && reportInfo.Estado_Informe === 'Completado';
 }
 
+function isFinalReportComplete(reportInfo) {
+    return reportInfo && reportInfo.Estado_Informe === 'Completado';
+}
+
 function displayCourses(courses, teacherName) {
     coursesResultsDiv.innerHTML = '';
     if (!courses || courses.length === 0) {
@@ -470,7 +507,20 @@ function displayCourses(courses, teacherName) {
             } else {
                 buttonsHtml += `<button class="btn btn-state-new" data-report-type="docPortfolio">Iniciar Documentación</button>`;
             }
+        } else if (selectedReportType === 'finalReport') { // <-- AÑADIDO
+            const reportId = `${selectedSemester}-${course.codigo}-${course.seccion}`;
+            const finalReportInfo = existingFinalReports[reportId];
+            if (finalReportInfo) {
+                const isComplete = isFinalReportComplete(finalReportInfo);
+                const buttonClass = isComplete ? 'btn-state-completed' : 'btn-state-pending';
+                const buttonText = isComplete ? 'Informe Final Completado' : 'Informe Final Pendiente';
+                buttonsHtml += `<button class="btn ${buttonClass}" data-report-type="finalReport">${buttonText}</button>`;
+                if (finalReportInfo.URL_Informe) buttonsHtml += `<a href="${finalReportInfo.URL_Informe}" target="_blank" class="btn">Ver Archivo</a>`;
+            } else {
+                buttonsHtml += `<button class="btn btn-state-new" data-report-type="finalReport">Hacer Informe Final</button>`;
+            }
         }
+
 
         card.innerHTML = `<h3>${course.codigo} - ${course.nombre}</h3><p style="color: var(--text-secondary); margin-top: -8px; margin-bottom: 16px;"><strong>Sección:</strong> ${course.seccion}</p><div class="details-grid"><div class="detail-item"><strong>Ciclo:</strong> ${course.ciclo}</div><div class="detail-item"><strong>Horas:</strong> ${course.horas}</div><div class="detail-item"><strong>Créditos:</strong> ${course.creditos}</div><div class="detail-item"><strong>Tipo:</strong> ${course.tipo}</div><div class="detail-item" style="grid-column: span 2;"><strong>Área:</strong> ${course.area}</div></div><div style="flex-grow: 1;"></div><div class="card-buttons">${buttonsHtml}</div>`;
         coursesResultsDiv.appendChild(card);
@@ -492,6 +542,9 @@ coursesResultsDiv.addEventListener('click', e => {
         openPortfolioModal(existingPortfolioReports[reportId] || null, unit);
     } else if (reportType === 'docPortfolio') {
         openDocPortfolioModal();
+    } else if (reportType === 'finalReport') { // <-- AÑADIDO
+        const reportId = `${selectedSemester}-${currentCourseData.codigo}-${currentCourseData.seccion}`;
+        openFinalReportModal(existingFinalReports[reportId] || null);
     }
 });
 
@@ -545,8 +598,11 @@ function openReportModal(reportInfo) {
 
 function openPortfolioModal(reportInfo, unit) {
     const isEditing = !!reportInfo;
-    currentReportId = isEditing ? `${selectedSemester}-${currentCourseData.codigo}-${currentCourseData.seccion}-${unit}` : null;
-    portfolioModalTitle.innerHTML = `Portafolio (Unidad ${unit}) <small>${currentCourseData.nombre} (${currentCourseData.seccion})<br><b>Docente:</b> ${currentTeacherData.NombreCompleto}</small>`;
+    currentReportId = isEditing ? (unit ? `${selectedSemester}-${currentCourseData.codigo}-${currentCourseData.seccion}-${unit}` : `${selectedSemester}-${currentCourseData.codigo}-${currentCourseData.seccion}`) : null;
+    
+    const titleText = unit ? `Portafolio (Unidad ${unit})` : 'Informe Final de Curso';
+    portfolioModalTitle.innerHTML = `${titleText} <small>${currentCourseData.nombre} (${currentCourseData.seccion})<br><b>Docente:</b> ${currentTeacherData.NombreCompleto}</small>`;
+    
     portfolioModal.style.display = 'flex';
     setTimeout(() => {
         portfolioSignaturePad = new SignaturePad(signatureCanvasPortfolio, { backgroundColor: 'rgb(255, 255, 255)' });
@@ -638,6 +694,91 @@ async function openDocPortfolioModal() {
         saveDocPortfolioBtn.style.display = 'none';
     }
 }
+
+// --- MODIFICADO: Lógica para el Modal de Informe Final ---
+function openFinalReportModal(reportInfo) {
+    const isEditing = !!reportInfo;
+    currentReportId = isEditing ? `${selectedSemester}-${currentCourseData.codigo}-${currentCourseData.seccion}` : null;
+    finalReportModalTitle.innerHTML = `Informe Final de Curso <small>${currentCourseData.nombre} (${currentCourseData.seccion})<br><b>Docente:</b> ${currentTeacherData.NombreCompleto}</small>`;
+    
+    finalReportModal.style.display = 'flex';
+    setTimeout(() => {
+        finalReportSignaturePad = new SignaturePad(signatureCanvasFinal, { backgroundColor: 'rgb(255, 255, 255)' });
+        resizeCanvas(signatureCanvasFinal, finalReportSignaturePad);
+    }, 100);
+
+    // Limpiar formulario y mensaje de éxito
+    finalResponseFinalReportDiv.innerHTML = ''; 
+    finalReportModal.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(el => el.value = '');
+    finalReportModal.querySelectorAll('input[type="radio"]').forEach(el => el.checked = false);
+
+    if (isEditing) {
+        // Rellenar campos del resumen
+        document.getElementById('if_matriculados').value = reportInfo.Cantidad_Matriculados ?? '';
+        document.getElementById('if_retirados').value = reportInfo.Cantidad_Retirados ?? '';
+        document.getElementById('if_abandono').value = reportInfo.Cantidad_Abandono ?? '';
+        document.getElementById('if_aprobados').value = reportInfo.Cantidad_Aprobados ?? '';
+        document.getElementById('if_porc_silabo').value = reportInfo.Pct_Cumplimiento_Silabo ?? '';
+        document.getElementById('if_practicas_realizadas').value = reportInfo.Cant_Practicas_Realizadas ?? '';
+        document.getElementById('if_lab_realizadas').value = reportInfo.Cant_Laboratorios_Realizados ?? '';
+        document.getElementById('if_proyectos_realizados').value = reportInfo.Cant_Proyectos_Realizados ?? '';
+        document.getElementById('if_nota_alta').value = reportInfo.Nota_Final_Alta ?? '';
+        document.getElementById('if_nota_promedio').value = reportInfo.Nota_Final_Promedio ?? '';
+        document.getElementById('if_nota_baja').value = reportInfo.Nota_Final_Baja ?? '';
+        
+        // Rellenar RAs
+        for(let i = 1; i <= 5; i++) {
+            document.getElementById(`if_ra${i}_nombre`).value = reportInfo[`RA${i}_Nombre`] ?? '';
+            const nivel = reportInfo[`RA${i}_Nivel`];
+            if (nivel) {
+                const radio = document.querySelector(`input[name="if_ra${i}_nivel"][value="${nivel}"]`);
+                if(radio) radio.checked = true;
+            }
+        }
+
+        // Rellenar Observaciones y AV
+        const obs_keys = {
+            if_obs_motivo_no_logro: 'Obs_Motivo_No_Logro', if_obs_estudiantes: 'Obs_Estudiantes', if_obs_asistencia: 'Obs_Asistencia',
+            if_obs_silabo: 'Obs_Silabo', if_obs_administrativas: 'Obs_Administrativas', if_obs_competencias: 'Obs_Competencias',
+            if_obs_mejora_continua: 'Obs_Mejora_Continua', if_obs_actualizacion_docente: 'Obs_Actualizacion_Docente', if_obs_recomendaciones: 'Obs_Recomendaciones'
+        };
+        for (const id in obs_keys) { document.getElementById(id).value = reportInfo[obs_keys[id]] ?? ''; }
+        
+        const av_keys = {
+            if_av_material_curso: 'AV_Material_Curso', if_av_cuestionarios: 'AV_Cuestionarios', if_av_tareas: 'AV_Tareas',
+            if_av_foros: 'AV_Foros', if_av_examenes: 'AV_Examenes', if_av_slideshow: 'AV_Slideshow'
+        };
+        for (const id in av_keys) { document.getElementById(id).value = reportInfo[av_keys[id]] ?? ''; }
+
+        // Rellenar Fecha y Firma
+        document.getElementById('if_fecha_informe').value = reportInfo.Fecha_Informe ? new Date(reportInfo.Fecha_Informe).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+        if (reportInfo.Firma_URL) {
+            const previewUrl = reportInfo.Firma_URL.replace("/uc?id=", "/file/d/") + "/preview";
+            existingSignatureIframeFinal.src = previewUrl;
+            existingSignatureWrapperFinal.style.display = 'block';
+            signaturePadWrapperFinal.style.display = 'none';
+            clearSignatureBtnFinal.textContent = 'Firmar de Nuevo';
+        } else {
+             existingSignatureWrapperFinal.style.display = 'none';
+            signaturePadWrapperFinal.style.display = 'block';
+            clearSignatureBtnFinal.textContent = 'Limpiar Firma';
+        }
+    } else {
+        // Configuración para un informe nuevo
+        document.getElementById('if_fecha_informe').value = new Date().toISOString().split('T')[0];
+        existingSignatureWrapperFinal.style.display = 'none';
+        signaturePadWrapperFinal.style.display = 'block';
+        clearSignatureBtnFinal.textContent = 'Limpiar Firma';
+    }
+    
+    saveFinalReportBtn.style.display = 'block';
+    saveFinalReportBtn.innerHTML = isEditing ? 'Actualizar Informe Final' : 'Guardar Informe Final';
+    saveFinalReportBtn.disabled = false;
+    
+    calculateFinalReportSummary();
+    updateStatusIndicator(finalReportStatusIndicator, isFinalReportComplete(reportInfo));
+}
+
 
 function buildDocPortfolioForm(reportData) {
     docPortfolioFormContainer.innerHTML = '';
@@ -819,6 +960,54 @@ function calculatePortfolio() {
     else asistenBarContainer.classList.add('pct-bg-red');
 }
 
+// --- AÑADIDO: Lógica de cálculo para el Informe Final ---
+finalReportModal.addEventListener('input', calculateFinalReportSummary);
+
+function calculateFinalReportSummary() {
+    let isValid = true;
+    let validationMessage = '';
+
+    const matriculados = parseInt(document.getElementById('if_matriculados').value) || 0;
+    const retirados = parseInt(document.getElementById('if_retirados').value) || 0;
+    const abandono = parseInt(document.getElementById('if_abandono').value) || 0;
+    const aprobados = parseInt(document.getElementById('if_aprobados').value) || 0;
+
+    const asisten = matriculados - retirados - abandono;
+    document.getElementById('if_asisten').value = asisten >= 0 ? asisten : 0;
+
+    const desaprobados = asisten - aprobados;
+    document.getElementById('if_desaprobados').value = desaprobados >= 0 ? desaprobados : 0;
+
+    if (matriculados < 0 || retirados < 0 || abandono < 0 || aprobados < 0) {
+        validationMessage = 'Las cantidades no pueden ser negativas.';
+        isValid = false;
+    } else if (asisten < 0) {
+        validationMessage = 'Error: Retirados y abandonos superan a los matriculados.';
+        isValid = false;
+    } else if (desaprobados < 0) {
+        validationMessage = 'Error: Aprobados superan a los que asisten.';
+        isValid = false;
+    }
+
+    document.getElementById('finalReportValidationMsg').textContent = validationMessage;
+    saveFinalReportBtn.disabled = !isValid || (matriculados === 0);
+
+    const formatPctText = (val, total) => total > 0 ? ((val / total) * 100).toFixed(1) + '%' : '0.0%';
+    document.getElementById('if_matriculados_span').textContent = formatPctText(matriculados, matriculados);
+    document.getElementById('if_retirados_span').textContent = formatPctText(retirados, matriculados);
+    document.getElementById('if_abandono_span').textContent = formatPctText(abandono, matriculados);
+    document.getElementById('if_asisten_span').textContent = formatPctText(asisten, matriculados);
+    document.getElementById('if_aprobados_span').textContent = formatPctText(aprobados, matriculados);
+    document.getElementById('if_desaprobados_span').textContent = formatPctText(desaprobados, matriculados);
+
+    const asisten_pct_val = matriculados > 0 ? (asisten / matriculados) * 100 : 0;
+    const asistenBarContainer = document.getElementById('if_asisten').nextElementSibling;
+    asistenBarContainer.classList.remove('pct-bg-green', 'pct-bg-yellow', 'pct-bg-red');
+    if (asisten_pct_val >= 90) asistenBarContainer.classList.add('pct-bg-green');
+    else if (asisten_pct_val >= 60) asistenBarContainer.classList.add('pct-bg-yellow');
+    else asistenBarContainer.classList.add('pct-bg-red');
+}
+
 saveReportBtn.addEventListener('click', async () => {
     const originalButtonText = saveReportBtn.innerHTML;
     saveReportBtn.disabled = true;
@@ -952,4 +1141,91 @@ saveDocPortfolioBtn.addEventListener('click', async () => {
         saveDocPortfolioBtn.disabled = false;
     }
 
+});
+
+
+// --- AÑADIDO: Listener para el botón de guardar del Informe Final ---
+saveFinalReportBtn.addEventListener('click', async () => {
+    const originalButtonText = saveFinalReportBtn.innerHTML;
+    saveFinalReportBtn.disabled = true;
+    saveFinalReportBtn.innerHTML = `<div class="spinner" style="width:18px; height:18px; border-width:2px; margin-right: 8px;"></div> Guardando...`;
+    finalResponseFinalReportDiv.innerHTML = '';
+
+    const reportInfo = existingFinalReports[currentReportId];
+
+    // Recolectar todos los datos del formulario
+    const reportData = {
+        uniqueId: currentReportId,
+        semestre: selectedSemester,
+        course: currentCourseData,
+        docente: currentTeacherData,
+        fecha_informe: document.getElementById('if_fecha_informe').value,
+        
+        resumen: {
+            cantidad_matriculados: document.getElementById('if_matriculados').value,
+            pct_matriculados: (parseFloat(document.getElementById('if_matriculados_span').textContent) || 0) / 100,
+            cantidad_retirados: document.getElementById('if_retirados').value,
+            pct_retirados: (parseFloat(document.getElementById('if_retirados_span').textContent) || 0) / 100,
+            cantidad_abandono: document.getElementById('if_abandono').value,
+            pct_abandono: (parseFloat(document.getElementById('if_abandono_span').textContent) || 0) / 100,
+            cantidad_asisten: document.getElementById('if_asisten').value,
+            pct_asisten: (parseFloat(document.getElementById('if_asisten_span').textContent) || 0) / 100,
+            cantidad_aprobados: document.getElementById('if_aprobados').value,
+            pct_aprobados: (parseFloat(document.getElementById('if_aprobados_span').textContent) || 0) / 100,
+            cantidad_desaprobados: document.getElementById('if_desaprobados').value,
+            pct_desaprobados: (parseFloat(document.getElementById('if_desaprobados_span').textContent) || 0) / 100,
+            pct_cumplimiento_silabo: document.getElementById('if_porc_silabo').value,
+            cant_practicas_realizadas: document.getElementById('if_practicas_realizadas').value,
+            cant_laboratorios_realizados: document.getElementById('if_lab_realizadas').value,
+            cant_proyectos_realizados: document.getElementById('if_proyectos_realizados').value,
+            nota_final_alta: document.getElementById('if_nota_alta').value,
+            nota_final_promedio: document.getElementById('if_nota_promedio').value,
+            nota_final_baja: document.getElementById('if_nota_baja').value
+        },
+        logros: {
+            ra1: { nombre: document.getElementById('if_ra1_nombre').value, nivel: document.querySelector('input[name="if_ra1_nivel"]:checked')?.value || null },
+            ra2: { nombre: document.getElementById('if_ra2_nombre').value, nivel: document.querySelector('input[name="if_ra2_nivel"]:checked')?.value || null },
+            ra3: { nombre: document.getElementById('if_ra3_nombre').value, nivel: document.querySelector('input[name="if_ra3_nivel"]:checked')?.value || null },
+            ra4: { nombre: document.getElementById('if_ra4_nombre').value, nivel: document.querySelector('input[name="if_ra4_nivel"]:checked')?.value || null },
+            ra5: { nombre: document.getElementById('if_ra5_nombre').value, nivel: document.querySelector('input[name="if_ra5_nivel"]:checked')?.value || null }
+        },
+        observaciones: {
+            obs_motivo_no_logro: document.getElementById('if_obs_motivo_no_logro').value,
+            obs_estudiantes: document.getElementById('if_obs_estudiantes').value,
+            obs_asistencia: document.getElementById('if_obs_asistencia').value,
+            obs_silabo: document.getElementById('if_obs_silabo').value,
+            obs_administrativas: document.getElementById('if_obs_administrativas').value,
+            obs_competencias: document.getElementById('if_obs_competencias').value,
+            obs_mejora_continua: document.getElementById('if_obs_mejora_continua').value,
+            obs_actualizacion_docente: document.getElementById('if_obs_actualizacion_docente').value,
+            obs_recomendaciones: document.getElementById('if_obs_recomendaciones').value
+        },
+        aula_virtual: {
+            av_material_curso: document.getElementById('if_av_material_curso').value,
+            av_cuestionarios: document.getElementById('if_av_cuestionarios').value,
+            av_tareas: document.getElementById('if_av_tareas').value,
+            av_foros: document.getElementById('if_av_foros').value,
+            av_examenes: document.getElementById('if_av_examenes').value,
+            av_slideshow: document.getElementById('if_av_slideshow').value
+        },
+        signatureBase64: (signaturePadWrapperFinal.style.display !== 'none' && finalReportSignaturePad && !finalReportSignaturePad.isEmpty()) ? finalReportSignaturePad.toDataURL('image/png') : null,
+        existingSignatureUrl: (reportInfo) ? reportInfo.Firma_URL : null
+    };
+
+    try {
+        const response = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'saveReport', reportType: 'finalReport', data: reportData }) });
+        const result = await response.json();
+        if (result.success) {
+            refreshOnClose = true;
+            saveFinalReportBtn.style.display = 'none';
+            finalResponseFinalReportDiv.innerHTML = `✅ ¡Informe Final Guardado! <a href="${result.url}" target="_blank">Abrir Archivo</a>`;
+            updateStatusIndicator(finalReportStatusIndicator, result.status === 'Completado');
+        } else {
+            throw new Error(result.message || 'Error desconocido.');
+        }
+    } catch (error) {
+        finalResponseFinalReportDiv.innerHTML = `<span style="color:var(--danger-color)">Error: ${error.message}</span>`;
+        saveFinalReportBtn.innerHTML = originalButtonText;
+        saveFinalReportBtn.disabled = false;
+    }
 });
