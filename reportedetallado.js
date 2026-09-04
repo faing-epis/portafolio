@@ -11,22 +11,58 @@ const totalCountEl = document.getElementById('total-count');
 const completedCountEl = document.getElementById('completed-count');
 const pendingCountEl = document.getElementById('pending-count');
 const unregisteredCountEl = document.getElementById('unregistered-count');
+const labelCompletados = document.getElementById('label-completados');
+const labelPendientes = document.getElementById('label-pendientes');
 const reportTableHead = document.querySelector('#report-table thead');
 const reportTableBody = document.querySelector('#report-table tbody');
 
+const tabAll = document.getElementById('tab-all');
+const tabSilabos = document.getElementById('tab-silabos');
+
 let reportDataCache = [];
 let reportHeadersCache = [];
+let activeTab = 'all'; // 'all' | 'silabos'
+
+// --- Mapeo de Clases CSS para Categorías ---
+const categoryClassMap = {
+    '1. Info General': 'category-general',
+    '2. Prueba de Entrada': 'category-entrada',
+    '3. Sílabos': 'category-silabos',
+    '4. Unidad I': 'category-unidad1',
+    '5. Unidad II': 'category-unidad2',
+    '6. Unidad III': 'category-unidad3'
+};
 
 // --- Event Listeners ---
 loadReportBtn.addEventListener('click', loadDetailedReportData);
 exportBtn.addEventListener('click', exportToCsv);
+
+if (tabAll && tabSilabos) {
+    tabAll.addEventListener('click', () => {
+        if (activeTab === 'all') return;
+        activeTab = 'all';
+        tabAll.classList.add('active');
+        tabSilabos.classList.remove('active');
+        renderActiveView();
+    });
+
+    tabSilabos.addEventListener('click', () => {
+        if (activeTab === 'silabos') return;
+        activeTab = 'silabos';
+        tabSilabos.classList.add('active');
+        tabAll.classList.remove('active');
+        renderActiveView();
+    });
+}
 
 function handleDetailedReportData(result) {
     try {
         if (!result.success) {
             throw new Error(result.message || 'Error del servidor.');
         }
-        displayDetailedReport(result.data, result.headers);
+        reportDataCache = result.data;
+        reportHeadersCache = result.headers;
+        renderActiveView();
     } catch (error) {
         console.error('Error al procesar datos:', error);
         alert(`No se pudo procesar el reporte: ${error.message}`);
@@ -55,24 +91,63 @@ function loadDetailedReportData() {
     document.body.appendChild(script);
 }
 
-function displayDetailedReport(data, headers) {
-    reportDataCache = data;
-    reportHeadersCache = headers;
+function getActiveHeaders() {
+    if (activeTab === 'silabos') {
+        return reportHeadersCache.filter(h => !h.category || h.category === '3. Sílabos');
+    }
+    return reportHeadersCache;
+}
 
-    const total = data.length;
-    const completados = data.filter(item => item.estadoGeneral === 'Completado').length;
-    const pendientes = data.filter(item => item.estadoGeneral === 'Pendiente').length;
-    const sinRegistro = data.filter(item => item.estadoGeneral === 'Sin Registro').length;
+function renderActiveView() {
+    if (!reportDataCache || reportDataCache.length === 0) return;
 
-    totalCountEl.textContent = total;
-    completedCountEl.textContent = completados;
-    pendingCountEl.textContent = pendientes;
-    unregisteredCountEl.textContent = sinRegistro;
+    const activeHeaders = getActiveHeaders();
+    updateMetrics();
+    renderTable(activeHeaders);
+    exportBtn.style.display = 'inline-flex';
+}
 
+function updateMetrics() {
+    const total = reportDataCache.length;
+
+    if (activeTab === 'silabos') {
+        labelCompletados.textContent = 'Sílabos Completos';
+        labelPendientes.textContent = 'Sílabos Pendientes';
+
+        // Un curso tiene sílabos completos si tanto UPT como ICACIT tienen '✅'
+        const completados = reportDataCache.filter(item => {
+            const upt = item.status_url_silabo_upt && item.status_url_silabo_upt.status === '✅';
+            const icacit = item.status_url_silabo_icacit && item.status_url_silabo_icacit.status === '✅';
+            return upt && icacit;
+        }).length;
+
+        const sinRegistro = reportDataCache.filter(item => item.estadoGeneral === 'Sin Registro').length;
+        const pendientes = total - completados - sinRegistro;
+
+        totalCountEl.textContent = total;
+        completedCountEl.textContent = completados;
+        pendingCountEl.textContent = pendientes;
+        unregisteredCountEl.textContent = sinRegistro;
+    } else {
+        labelCompletados.textContent = 'Completados';
+        labelPendientes.textContent = 'Pendientes';
+
+        const completados = reportDataCache.filter(item => item.estadoGeneral === 'Completado').length;
+        const pendientes = reportDataCache.filter(item => item.estadoGeneral === 'Pendiente').length;
+        const sinRegistro = reportDataCache.filter(item => item.estadoGeneral === 'Sin Registro').length;
+
+        totalCountEl.textContent = total;
+        completedCountEl.textContent = completados;
+        pendingCountEl.textContent = pendientes;
+        unregisteredCountEl.textContent = sinRegistro;
+    }
+}
+
+function renderTable(headers) {
     reportTableHead.innerHTML = '';
-    const headerRow1 = document.createElement('tr'); // Fila de categorías principales
-    const headerRow2 = document.createElement('tr'); // Fila de subcategorías
-    const headerRow3 = document.createElement('tr'); // Fila de evidencias
+    const headerRow1 = document.createElement('tr'); // Categorías principales
+    const headerRow2 = document.createElement('tr'); // Subcategorías
+    const headerRow3 = document.createElement('tr'); // Evidencias
 
     const baseHeaders = headers.filter(h => !h.category);
     baseHeaders.forEach(header => {
@@ -104,10 +179,8 @@ function displayDetailedReport(data, headers) {
         catTh.colSpan = categoryColspan;
         catTh.classList.add('category-header');
 
-        // --- [CORRECCIÓN CRÍTICA AQUÍ] ---
-        // Genera un nombre de clase válido eliminando espacios y caracteres especiales.
-        const categoryClass = 'category-' + categoryName.split('.')[1].trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-        catTh.classList.add(categoryClass);
+        const catClass = categoryClassMap[categoryName] || 'category-general';
+        catTh.classList.add(catClass);
 
         headerRow1.appendChild(catTh);
 
@@ -132,9 +205,9 @@ function displayDetailedReport(data, headers) {
     reportTableHead.appendChild(headerRow3);
 
     reportTableBody.innerHTML = '';
-    data.sort((a, b) => a.docente.localeCompare(b.docente));
+    const sortedData = [...reportDataCache].sort((a, b) => a.docente.localeCompare(b.docente));
 
-    data.forEach(item => {
+    sortedData.forEach(item => {
         const row = document.createElement('tr');
         headers.forEach(header => {
             const td = document.createElement('td');
@@ -142,55 +215,76 @@ function displayDetailedReport(data, headers) {
 
             if (header.category) {
                 td.classList.add('status-cell');
-                const tooltipText = value.names && value.names.length > 0 ? value.names.join('<br>') : '(Vacío)';
+                const tooltipText = value && value.names && value.names.length > 0 ? value.names.join('<br>') : '(Vacío)';
                 td.innerHTML = `
                     <div class="tooltip">
-                      <a href="${value.url}" target="_blank">${value.status}</a>
+                      <a href="${(value && value.url) ? value.url : '#'}" target="_blank">${(value && value.status) ? value.status : '❌'}</a>
                       <span class="tooltiptext">${tooltipText}</span>
                     </div>`;
             } else if (header.key === 'estadoGeneral') {
+                let displayStatus = value;
+                if (activeTab === 'silabos') {
+                    const upt = item.status_url_silabo_upt && item.status_url_silabo_upt.status === '✅';
+                    const icacit = item.status_url_silabo_icacit && item.status_url_silabo_icacit.status === '✅';
+                    if (value === 'Sin Registro') {
+                        displayStatus = 'Sin Registro';
+                    } else if (upt && icacit) {
+                        displayStatus = 'Completado';
+                    } else {
+                        displayStatus = 'Pendiente';
+                    }
+                }
+
                 let statusClass = '';
-                if (value === 'Completado') statusClass = 'status-completado';
-                if (value === 'Pendiente') statusClass = 'status-pendiente';
-                if (value === 'Sin Registro') statusClass = 'status-sin-registro';
-                td.innerHTML = `<span class="status-tag ${statusClass}">${value}</span>`;
+                if (displayStatus === 'Completado') statusClass = 'status-completado';
+                else if (displayStatus === 'Pendiente') statusClass = 'status-pendiente';
+                else statusClass = 'status-sin-registro';
+
+                td.innerHTML = `<span class="status-tag ${statusClass}">${displayStatus}</span>`;
             } else {
-                td.textContent = value;
+                td.textContent = value || 'N/A';
             }
             row.appendChild(td);
         });
         reportTableBody.appendChild(row);
     });
-
-    exportBtn.style.display = 'inline-flex';
 }
 
 function exportToCsv() {
-    if (reportDataCache.length === 0) {
+    if (!reportDataCache || reportDataCache.length === 0) {
         alert("No hay datos para exportar.");
         return;
     }
 
-    const headers = reportHeadersCache.map(h => `"${h.label.replace(/"/g, '""')}"`).join(',');
+    const activeHeaders = getActiveHeaders();
+    const headersLine = activeHeaders.map(h => `"${h.label.replace(/"/g, '""')}"`).join(';');
+    
     const rows = reportDataCache.map(item => {
-        const rowData = reportHeadersCache.map(header => {
+        const rowData = activeHeaders.map(header => {
             let cellValue = item[header.key] || '';
             if (header.category) {
                 cellValue = (cellValue && cellValue.status) ? cellValue.status : '❌';
+            } else if (header.key === 'estadoGeneral' && activeTab === 'silabos') {
+                const upt = item.status_url_silabo_upt && item.status_url_silabo_upt.status === '✅';
+                const icacit = item.status_url_silabo_icacit && item.status_url_silabo_icacit.status === '✅';
+                if (item.estadoGeneral === 'Sin Registro') cellValue = 'Sin Registro';
+                else if (upt && icacit) cellValue = 'Completado';
+                else cellValue = 'Pendiente';
             }
             return `"${String(cellValue).replace(/"/g, '""')}"`;
         });
-        return rowData.join(',');
+        return rowData.join(';');
     });
 
-    const csvContent = "data:text/csv;charset=utf-8," + headers + "\n" + rows.join("\n");
-    const encodedUri = encodeURI(csvContent);
+    const csvContent = "\uFEFF" + headersLine + "\r\n" + rows.join("\r\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `reporte_detallado_evidencias_${semesterSelector.value}.csv`);
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    const suffix = activeTab === 'silabos' ? 'silabos' : 'evidencias';
+    link.setAttribute("download", `reporte_${suffix}_${semesterSelector.value}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-
+    URL.revokeObjectURL(url);
 }
-
